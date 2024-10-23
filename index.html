@@ -3,23 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tic Tac Toe</title>
+    <title>Animated Tic Tac Toe</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        :root {
+            --bg-gradient-light: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --bg-gradient-dark: linear-gradient(135deg, #1a1c2c 0%, #2d1f3d 100%);
+            --cell-bg-light: rgba(255, 255, 255, 0.1);
+            --cell-bg-dark: rgba(0, 0, 0, 0.2);
+            --text-light: white;
+            --text-dark: #e1e1e1;
+            --button-bg-light: white;
+            --button-bg-dark: #2d1f3d;
+            --button-text-light: #764ba2;
+            --button-text-dark: #e1e1e1;
         }
 
         body {
             min-height: 100vh;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: var(--bg-gradient-light);
             display: flex;
             flex-direction: column;
             align-items: center;
             padding: 20px;
-            color: white;
+            color: var(--text-light);
+        }
+
+        body.dark-mode {
+            background: var(--bg-gradient-dark);
+            color: var(--text-dark);
         }
 
         .container {
@@ -32,32 +51,72 @@
             margin-bottom: 20px;
             font-size: 2.5rem;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+            animation: titleFloat 3s ease-in-out infinite;
+        }
+
+        @keyframes titleFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .theme-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.5rem;
+            animation: spin 0.5s ease-out;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
         }
 
         .mode-select {
-            background: rgba(255, 255, 255, 0.1);
+            background: var(--cell-bg-light);
             backdrop-filter: blur(10px);
             border-radius: 15px;
             padding: 20px;
             margin-bottom: 20px;
             text-align: center;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .dark-mode .mode-select {
+            background: var(--cell-bg-dark);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .mode-select button {
-            background: white;
+            background: var(--button-bg-light);
             border: none;
             padding: 10px 20px;
             margin: 10px;
             border-radius: 25px;
             cursor: pointer;
             font-size: 1rem;
-            transition: transform 0.2s;
-            color: #764ba2;
+            transition: transform 0.2s, box-shadow 0.2s;
+            color: var(--button-text-light);
             font-weight: bold;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .dark-mode .mode-select button {
+            background: var(--button-bg-dark);
+            color: var(--button-text-dark);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
         }
 
         .mode-select button:hover {
-            transform: scale(1.05);
+            transform: scale(1.05) translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
         }
 
         .board {
@@ -65,68 +124,139 @@
             grid-template-columns: repeat(3, 1fr);
             gap: 10px;
             margin-top: 20px;
-            background: rgba(255, 255, 255, 0.1);
+            background: var(--cell-bg-light);
             backdrop-filter: blur(10px);
             border-radius: 15px;
             padding: 10px;
+            animation: boardAppear 0.5s ease-out;
+        }
+
+        .dark-mode .board {
+            background: var(--cell-bg-dark);
+        }
+
+        @keyframes boardAppear {
+            from { transform: scale(0.9); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
         }
 
         .cell {
             aspect-ratio: 1;
-            background: rgba(255, 255, 255, 0.1);
+            background: var(--cell-bg-light);
             border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 2rem;
             cursor: pointer;
-            transition: background-color 0.3s;
+            transition: background-color 0.3s, transform 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dark-mode .cell {
+            background: var(--cell-bg-dark);
         }
 
         .cell:hover {
+            transform: scale(1.05);
             background: rgba(255, 255, 255, 0.2);
         }
+
+        .cell::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.5s, height 0.5s;
+        }
+
+        .cell:active::after {
+            width: 150%;
+            height: 150%;
+        }
+
+        .x, .o {
+            animation: symbolAppear 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        @keyframes symbolAppear {
+            from { transform: scale(0) rotate(-180deg); opacity: 0; }
+            to { transform: scale(1) rotate(0deg); opacity: 1; }
+        }
+
+        .x { color: #FF6B6B; }
+        .o { color: #4ECDC4; }
+
+        .dark-mode .x { color: #ff8f8f; }
+        .dark-mode .o { color: #6ce7df; }
 
         .status {
             text-align: center;
             margin: 20px 0;
             font-size: 1.2rem;
             min-height: 2em;
+            animation: statusPulse 2s infinite;
+        }
+
+        @keyframes statusPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
         }
 
         .reset {
-            background: white;
+            background: var(--button-bg-light);
             border: none;
             padding: 10px 20px;
             border-radius: 25px;
             cursor: pointer;
             font-size: 1rem;
-            color: #764ba2;
+            color: var(--button-text-light);
             font-weight: bold;
             margin: 10px auto;
             display: block;
+            transition: transform 0.2s, box-shadow 0.2s;
+            animation: bounceIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
-        .x {
-            color: #FF6B6B;
+        .dark-mode .reset {
+            background: var(--button-bg-dark);
+            color: var(--button-text-dark);
         }
 
-        .o {
-            color: #4ECDC4;
+        @keyframes bounceIn {
+            0% { transform: scale(0); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .reset:hover {
+            transform: scale(1.05) translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
         }
 
         @media (max-width: 400px) {
-            h1 {
-                font-size: 2rem;
-            }
-            
-            .cell {
-                font-size: 1.5rem;
-            }
+            h1 { font-size: 2rem; }
+            .cell { font-size: 1.5rem; }
+        }
+
+        .winning-cell {
+            animation: winner 1s ease infinite;
+        }
+
+        @keyframes winner {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
         }
     </style>
 </head>
 <body>
+    <button class="theme-toggle" onclick="toggleTheme()">🌓</button>
     <div class="container">
         <h1>Tic Tac Toe</h1>
         <div class="mode-select">
@@ -145,15 +275,23 @@
         let gameActive = false;
         let gameMode = '';
         const winPatterns = [
-            [0, 1, 2], [3, 4, 5], [6, 7, 8], // Rows
-            [0, 3, 6], [1, 4, 7], [2, 5, 8], // Columns
-            [0, 4, 8], [2, 4, 6] // Diagonals
+            [0, 1, 2], [3, 4, 5], [6, 7, 8],
+            [0, 3, 6], [1, 4, 7], [2, 5, 8],
+            [0, 4, 8], [2, 4, 6]
         ];
 
         const board = document.querySelector('.board');
         const status = document.querySelector('.status');
         const modeSelect = document.querySelector('.mode-select');
         const resetBtn = document.querySelector('.reset');
+
+        function toggleTheme() {
+            document.body.classList.toggle('dark-mode');
+            const themeToggle = document.querySelector('.theme-toggle');
+            themeToggle.style.animation = 'none';
+            themeToggle.offsetHeight; // Trigger reflow
+            themeToggle.style.animation = 'spin 0.5s ease-out';
+        }
 
         // Initialize the board
         for (let i = 0; i < 9; i++) {
@@ -190,12 +328,14 @@
 
         function makeMove(index) {
             gameBoard[index] = currentPlayer;
-            document.querySelectorAll('.cell')[index].textContent = currentPlayer;
-            document.querySelectorAll('.cell')[index].classList.add(currentPlayer.toLowerCase());
+            const cell = document.querySelectorAll('.cell')[index];
+            cell.textContent = currentPlayer;
+            cell.classList.add(currentPlayer.toLowerCase());
 
             if (checkWin()) {
                 gameActive = false;
                 status.textContent = `${currentPlayer} wins!`;
+                highlightWinningCells();
                 resetBtn.style.display = 'block';
                 return;
             }
@@ -211,30 +351,43 @@
             status.textContent = `${currentPlayer}'s turn`;
         }
 
+        function highlightWinningCells() {
+            for (const pattern of winPatterns) {
+                const [a, b, c] = pattern;
+                if (
+                    gameBoard[a] &&
+                    gameBoard[a] === gameBoard[b] &&
+                    gameBoard[a] === gameBoard[c]
+                ) {
+                    const cells = document.querySelectorAll('.cell');
+                    cells[a].classList.add('winning-cell');
+                    cells[b].classList.add('winning-cell');
+                    cells[c].classList.add('winning-cell');
+                    break;
+                }
+            }
+        }
+
         function makeAIMove() {
             if (!gameActive) return;
 
-            // Try to win
             const winMove = findBestMove('O');
             if (winMove !== -1) {
                 makeMove(winMove);
                 return;
             }
 
-            // Block player from winning
             const blockMove = findBestMove('X');
             if (blockMove !== -1) {
                 makeMove(blockMove);
                 return;
             }
 
-            // Take center if available
             if (gameBoard[4] === '') {
                 makeMove(4);
                 return;
             }
 
-            // Take a corner
             const corners = [0, 2, 6, 8];
             const availableCorners = corners.filter(i => gameBoard[i] === '');
             if (availableCorners.length > 0) {
@@ -242,7 +395,6 @@
                 return;
             }
 
-            // Take any available space
             const availableMoves = gameBoard.map((cell, i) => cell === '' ? i : -1).filter(i => i !== -1);
             if (availableMoves.length > 0) {
                 makeMove(availableMoves[Math.floor(Math.random() * availableMoves.length)]);
@@ -277,11 +429,26 @@
             gameBoard = ['', '', '', '', '', '', '', '', ''];
             currentPlayer = 'X';
             gameActive = false;
-            document.querySelectorAll('.cell').forEach(cell => {
-                cell.textContent = '';
-                cell.classList.remove('x', 'o');
+            
+            // Animate cells clearing
+            document.querySelectorAll('.cell').forEach((cell, index) => {
+                setTimeout(() => {
+                    cell.style.animation = 'symbolAppear 0.3s reverse';
+                    setTimeout(() => {
+                        cell.textContent = '';
+                        cell.className = 'cell'; // Remove all classes except 'cell'
+                        cell.style.animation = '';
+                    }, 300);
+                }, index * 50); // Stagger the clearing animation
             });
-            modeSelect.style.display = 'block';
+
+            // Animate mode select appearing
+            setTimeout(() => {
+                modeSelect.style.display = 'block';
+                modeSelect.style.animation = 'fadeIn 0.5s ease-out';
+            }, 600);
+
+            // Hide other elements
             board.style.display = 'none';
             status.textContent = '';
             resetBtn.style.display = 'none';
